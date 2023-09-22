@@ -40,7 +40,7 @@ fn main() {
 
 ## To authorize user
 
-for users to link their loaning account with your app they need to obtain code from [LENDER_API_BASE_URL/api/v1/oauth/auth/authorize?response_type=code&client_id={YOUR CLINET_ID}](https://LENDER_API_BASE_URL/api/v1/oauth/auth/authorize?response_type=code&client_id={YOUR_CLINET_ID}) endpoint from their frontend app.
+for users to link their loaning account with your app they need to obtain code from [LENDER_API_BASE_URL/api/v1/oauth/auth/authorize?response_type=code&client_id={YOUR_CLIENT_ID}](https://LENDER_API_BASE_URL/api/v1/oauth/auth/authorize?response_type=code&client_id={YOUR_CLIENT_ID}) endpoint from their frontend app.
 
 the code is then exchanged for account info as shown below replacing `USER_CODE` with the code obtained from the above endpoint.
 
