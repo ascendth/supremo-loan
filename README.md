@@ -141,4 +141,4 @@ to finds clinets who are suing the software.
 
 ## License
 
-[MIT License](github.com/supremo-loan/supremo-loan-api-implementation/blob/master/LICENSE)
+[MIT License](https://github.com/ascendth/supremo-loan/blob/main/LICENSE)

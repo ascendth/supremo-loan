@@ -206,7 +206,7 @@ impl LoanClient {
         }
     }
 
-    pub fn client_limit(&self, bearer_token: String, client_id: i32) -> Result<ClientLimit, Error> {
+    pub fn client_limit(&self, bearer_token: &str, client_id: i32) -> Result<ClientLimit, Error> {
         let url = format!("{}/api/v1/oauth/client-limit/{}", self.base_url, client_id);
 
         let client = reqwest::blocking::Client::new();
@@ -214,8 +214,8 @@ impl LoanClient {
         let mut headers = reqwest::header::HeaderMap::new();
 
         headers.insert(
-            reqwest::header::AUTHORIZATION,
-            reqwest::header::HeaderValue::from_str(&bearer_token).unwrap(),
+            "Authorization",
+            format!("Bearer {}", &bearer_token).parse().unwrap(),
         );
 
         headers.insert(
@@ -239,12 +239,12 @@ impl LoanClient {
 
     pub fn get_anchors(
         &self,
-        bearer_token: String,
+        bearer_token: &str,
         client_id: i32,
         pagination: Option<AnchorPagination>,
     ) -> Result<PaginatedAnchors, Error> {
         let url = format!(
-            "{}/api/v1/anchors/client-anchors/{}",
+            "{}/api/v1/oauth/client-anchors/{}",
             self.base_url, client_id
         );
         let client = reqwest::blocking::Client::new();
@@ -465,6 +465,50 @@ mod tests {
         );
 
         let user = client.exchange_code_auth("w59HPRYvCiE49eeGjazFIw==");
+        match user {
+            Ok(user) => {
+                println!("user {:?}", user);
+            }
+            Err(e) => {
+                println!("error {:?}", e.to_string());
+            }
+        }
+    }
+
+    #[test]
+    fn test_get_anchors() {
+        let client = LoanClient::new(
+            String::from("http://localhost:8080"),
+            String::from("QX5MgtTRCY48Nk7oMsXlDawofy2qmP8ngyjf8RMfVS62oaHFAq"),
+            String::from("eplvesJPuZSS9oOkNQM1pLmZBvazv"),
+            String::from("access"),
+            String::from("logo_url"),
+            String::from("http://127.0.0.1:8020/"),
+        );
+
+        let user = client.get_anchors("uc3zfHDuYEmzhn9FM7lwNQ==", 1, None);
+        match user {
+            Ok(user) => {
+                println!("user {:?}", user);
+            }
+            Err(e) => {
+                println!("error {:?}", e.to_string());
+            }
+        }
+    }
+
+    #[test]
+    fn test_client_limits() {
+        let client = LoanClient::new(
+            String::from("http://localhost:8080"),
+            String::from("QX5MgtTRCY48Nk7oMsXlDawofy2qmP8ngyjf8RMfVS62oaHFAq"),
+            String::from("eplvesJPuZSS9oOkNQM1pLmZBvazv"),
+            String::from("access"),
+            String::from("logo_url"),
+            String::from("http://127.0.0.1:8020/"),
+        );
+
+        let user = client.client_limit("uc3zfHDuYEmzhn9FM7lwNQ==", 1);
         match user {
             Ok(user) => {
                 println!("user {:?}", user);
