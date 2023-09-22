@@ -5,12 +5,12 @@ use serde_json::json;
 
 use super::types::{
     AnchorPagination, CalculateLonaResponse, ClientLimit, LoanCreted, LoanInput, OuathCode,
-    OuathUser, PaginatedAnchors,
+    OuathToken, OuathUser, PaginatedAnchors,
 };
 
 /// # Examples
 /// ```
-/// use loan_api::api::client::LoanClient;
+/// use supremo_loan::api::client::LoanClient;
 /// fn main() {
 /// let client = LoanClient::new(
 ///     String::from("base_url"),
@@ -60,7 +60,59 @@ impl LoanClient {
         }
     }
 
-    pub fn get_aouth_user(&self, bearer_token: String) -> Result<OuathUser, Error> {
+    pub fn get_auth_token(&self) -> Result<OuathToken, Error> {
+        let url = format!("{}/api/v1/oauth/auth/token/", self.base_url);
+
+        let client = reqwest::blocking::Client::new();
+
+        let body = json!({
+            "grant_type": "client_credentials",
+            "redirect_uri" : self.redirect_url,
+            "cliend_id" : self.public_key,
+        });
+
+        let mut headers = reqwest::header::HeaderMap::new();
+
+        headers.insert(
+            reqwest::header::CONTENT_TYPE,
+            reqwest::header::HeaderValue::from_static("application/json"),
+        );
+
+        let res = client
+            .post(&url)
+            .basic_auth(&self.public_key, Some(&self.secret_key))
+            .headers(headers)
+            .form(&body)
+            .send();
+
+        match res {
+            Ok(res) => {
+                // march status code
+                match res.status() {
+                    reqwest::StatusCode::OK => {
+                        let json = res.json::<OuathToken>();
+                        match json {
+                            Ok(json) => Ok(json),
+                            Err(e) => Err(Error::new(std::io::ErrorKind::Other, e)),
+                        }
+                    }
+                    _ => {
+                        let json = res.json::<serde_json::Value>();
+                        match json {
+                            Ok(json) => Err(Error::new(
+                                std::io::ErrorKind::Other,
+                                serde_json::to_string(&json).unwrap(),
+                            )),
+                            Err(e) => Err(Error::new(std::io::ErrorKind::Other, e)),
+                        }
+                    }
+                }
+            }
+            Err(e) => Err(Error::new(std::io::ErrorKind::Other, e)),
+        }
+    }
+
+    fn get_aouth_user(&self, bearer_token: String) -> Result<OuathUser, Error> {
         let url = format!("{}/api/v1/oauth/auth/user", self.base_url);
         let client = reqwest::blocking::Client::new();
 
@@ -402,7 +454,7 @@ mod tests {
 
     // test auth process
     #[test]
-    fn test_auth() {
+    fn test_user_auth() {
         let client = LoanClient::new(
             String::from("http://localhost:8080"),
             String::from("QX5MgtTRCY48Nk7oMsXlDawofy2qmP8ngyjf8RMfVS62oaHFAq"),
@@ -416,6 +468,28 @@ mod tests {
         match user {
             Ok(user) => {
                 println!("user {:?}", user);
+            }
+            Err(e) => {
+                println!("error {:?}", e.to_string());
+            }
+        }
+    }
+
+    #[test]
+    fn test_auth_token() {
+        let client = LoanClient::new(
+            String::from("http://localhost:8080"),
+            String::from("QX5MgtTRCY48Nk7oMsXlDawofy2qmP8ngyjf8RMfVS62oaHFAq"),
+            String::from("eplvesJPuZSS9oOkNQM1pLmZBvazv"),
+            String::from("access"),
+            String::from("logo_url"),
+            String::from("http://127.0.0.1:8020/"),
+        );
+
+        let ouath = client.get_auth_token();
+        match ouath {
+            Ok(ouath) => {
+                println!("ouath {:?}", ouath);
             }
             Err(e) => {
                 println!("error {:?}", e.to_string());

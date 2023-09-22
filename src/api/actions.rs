@@ -4,8 +4,8 @@ use super::client::LoanClient;
 
 /// # Examples
 /// ```
-/// use loan_api::api::actions::{create_clients, add_clients_keys};
-/// use loan_api::api::client::LoanClient;
+/// use supremo_loan::api::actions::{create_clients, add_clients_keys};
+/// use supremo_loan::api::client::LoanClient;
 /// use std::{io::Error, env};
 /// fn main(){
 ///     let clients_json = serde_json::json!([{
@@ -28,8 +28,8 @@ use super::client::LoanClient;
 ///
 /// # Examples
 /// ```
-/// use loan_api::api::actions::create_clients;
-/// use loan_api::api::client::LoanClient;
+/// use supremo_loan::api::actions::create_clients;
+/// use supremo_loan::api::client::LoanClient;
 /// use std::io::Error;
 /// fn main() -> Result<(), Error> {
 ///     let clients_json =serde_json::json!([{

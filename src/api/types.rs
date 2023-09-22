@@ -78,3 +78,12 @@ pub struct OuathCode{
     pub expires_in : i32,
     pub scope : String,
 }
+
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct OuathToken{
+    pub access_token : String,
+    pub token_type : String,
+    pub expires_in : i32,
+    pub scope : String,
+}
