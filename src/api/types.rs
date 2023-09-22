@@ -52,9 +52,9 @@ pub struct CalculateLonaResponse {
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct ClientLimit {
-    remaining_limit: f64,
-    total_limit: f64,
-    used_limit: f64,
+    pub remaining_limit: f64,
+    pub total_limit: f64,
+    pub used_limit: f64,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -64,10 +64,10 @@ pub struct LoanCreted {
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct OuathUser{
-    id : i32,
-    email : String,
-    company_name : String,
-    anchor_id : i32,
+    pub id : i32,
+    pub email : String,
+    pub company_name : String,
+    pub anchor_id : i32,
 }
 
 #[derive(Serialize, Deserialize, Debug)]

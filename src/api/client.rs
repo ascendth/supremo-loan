@@ -60,45 +60,52 @@ impl LoanClient {
         }
     }
 
-    pub async fn get_aouth_user(&self, bearer_token: String) -> Result<OuathUser, Error> {
+    pub fn get_aouth_user(&self, bearer_token: String) -> Result<OuathUser, Error> {
         let url = format!("{}/api/v1/oauth/auth/user", self.base_url);
-        let client = reqwest::Client::new();
+        let client = reqwest::blocking::Client::new();
 
         let mut headers = reqwest::header::HeaderMap::new();
-        headers.insert(
-            reqwest::header::AUTHORIZATION,
-            reqwest::header::HeaderValue::from_str(&bearer_token).unwrap(),
-        );
 
         headers.insert(
-            reqwest::header::CONTENT_TYPE,
-            reqwest::header::HeaderValue::from_static("application/json"),
+            "Authorization",
+            format!("Bearer {}", &bearer_token).parse().unwrap(),
         );
 
-        let res = client.get(&url).headers(headers).send().await;
+        let res = client.get(&url).headers(headers).send();
 
         match res {
-            Ok(res) => {
-                let json = res.json::<OuathUser>().await;
-                match json {
-                    Ok(json) => Ok(json),
-                    Err(e) => Err(Error::new(std::io::ErrorKind::Other, e)),
+            Ok(res) => match res.status() {
+                reqwest::StatusCode::OK => {
+                    let json = res.json::<OuathUser>();
+                    match json {
+                        Ok(json) => Ok(json),
+                        Err(e) => Err(Error::new(std::io::ErrorKind::Other, e)),
+                    }
                 }
-            }
+                _ => {
+                    let json = res.json::<serde_json::Value>();
+                    match json {
+                        Ok(json) => Err(Error::new(
+                            std::io::ErrorKind::Other,
+                            serde_json::to_string(&json).unwrap(),
+                        )),
+                        Err(e) => Err(Error::new(std::io::ErrorKind::Other, e)),
+                    }
+                }
+            },
             Err(e) => Err(Error::new(std::io::ErrorKind::Other, e)),
         }
     }
 
-    pub async fn exchange_code_auth(&self, code: String) -> Result<OuathUser, Error> {
+    pub fn exchange_code_auth(&self, code: &str) -> Result<OuathUser, Error> {
         let url = format!("{}/api/v1/oauth/auth/token/", self.base_url);
-        let client = reqwest::Client::new();
+        let client = reqwest::blocking::Client::new();
 
         let body = json!({
             "code": code,
             "grant_type": "authorization_code",
             "redirect_uri": self.redirect_url,
         });
-
         let mut headers = reqwest::header::HeaderMap::new();
 
         headers.insert(
@@ -106,40 +113,51 @@ impl LoanClient {
             reqwest::header::HeaderValue::from_static("application/json"),
         );
 
+        // use x-www-form-urlencoded
         let res = client
             .post(&url)
-            .headers(headers)
             .basic_auth(&self.public_key, Some(&self.secret_key))
-            .json(&body)
-            .send()
-            .await;
+            .headers(headers)
+            .form(&body)
+            .send();
 
         match res {
             Ok(res) => {
-                let json = res.json::<OuathCode>().await;
-                match json {
-                    Ok(json) => {
-                        let user = self.get_aouth_user(json.access_token).await;
-                        match user {
-                            Ok(user) => Ok(user),
+                // march status code
+                match res.status() {
+                    reqwest::StatusCode::OK => {
+                        let json = res.json::<OuathCode>();
+                        match json {
+                            Ok(json) => {
+                                let user = self.get_aouth_user(json.access_token);
+                                match user {
+                                    Ok(user) => Ok(user),
+                                    Err(e) => Err(Error::new(std::io::ErrorKind::Other, e)),
+                                }
+                            }
                             Err(e) => Err(Error::new(std::io::ErrorKind::Other, e)),
                         }
                     }
-                    Err(e) => Err(Error::new(std::io::ErrorKind::Other, e)),
+                    _ => {
+                        let json = res.json::<serde_json::Value>();
+                        match json {
+                            Ok(json) => Err(Error::new(
+                                std::io::ErrorKind::Other,
+                                serde_json::to_string(&json).unwrap(),
+                            )),
+                            Err(e) => Err(Error::new(std::io::ErrorKind::Other, e)),
+                        }
+                    }
                 }
             }
             Err(e) => Err(Error::new(std::io::ErrorKind::Other, e)),
         }
     }
 
-    pub async fn client_limit(
-        &self,
-        bearer_token: String,
-        client_id: i32,
-    ) -> Result<ClientLimit, Error> {
+    pub fn client_limit(&self, bearer_token: String, client_id: i32) -> Result<ClientLimit, Error> {
         let url = format!("{}/api/v1/oauth/client-limit/{}", self.base_url, client_id);
 
-        let client = reqwest::Client::new();
+        let client = reqwest::blocking::Client::new();
 
         let mut headers = reqwest::header::HeaderMap::new();
 
@@ -153,11 +171,11 @@ impl LoanClient {
             reqwest::header::HeaderValue::from_static("application/json"),
         );
 
-        let res = client.get(&url).headers(headers).send().await;
+        let res = client.get(&url).headers(headers).send();
 
         match res {
             Ok(res) => {
-                let json = res.json::<ClientLimit>().await;
+                let json = res.json::<ClientLimit>();
                 match json {
                     Ok(json) => Ok(json),
                     Err(e) => Err(Error::new(std::io::ErrorKind::Other, e)),
@@ -167,7 +185,7 @@ impl LoanClient {
         }
     }
 
-    pub async fn get_anchors(
+    pub fn get_anchors(
         &self,
         bearer_token: String,
         client_id: i32,
@@ -177,12 +195,12 @@ impl LoanClient {
             "{}/api/v1/anchors/client-anchors/{}",
             self.base_url, client_id
         );
-        let client = reqwest::Client::new();
+        let client = reqwest::blocking::Client::new();
 
         let mut headers = reqwest::header::HeaderMap::new();
         headers.insert(
-            reqwest::header::AUTHORIZATION,
-            reqwest::header::HeaderValue::from_str(&bearer_token).unwrap(),
+            "Authorization",
+            format!("Bearer {}", &bearer_token).parse().unwrap(),
         );
 
         headers.insert(
@@ -205,21 +223,33 @@ impl LoanClient {
             }
         }
 
-        let res = client.get(url).headers(headers).send().await;
+        let res = client.get(url).headers(headers).send();
 
         match res {
-            Ok(res) => {
-                let json = res.json::<PaginatedAnchors>().await;
-                match json {
-                    Ok(json) => Ok(json),
-                    Err(e) => Err(Error::new(std::io::ErrorKind::Other, e)),
+            Ok(res) => match res.status() {
+                reqwest::StatusCode::OK => {
+                    let json = res.json::<PaginatedAnchors>();
+                    match json {
+                        Ok(json) => Ok(json),
+                        Err(e) => Err(Error::new(std::io::ErrorKind::Other, e)),
+                    }
                 }
-            }
+                _ => {
+                    let json = res.json::<serde_json::Value>();
+                    match json {
+                        Ok(json) => Err(Error::new(
+                            std::io::ErrorKind::Other,
+                            serde_json::to_string(&json).unwrap(),
+                        )),
+                        Err(e) => Err(Error::new(std::io::ErrorKind::Other, e)),
+                    }
+                }
+            },
             Err(e) => Err(Error::new(std::io::ErrorKind::Other, e)),
         }
     }
 
-    pub async fn calculate_loan(
+    pub fn calculate_loan(
         &self,
         bearer_token: String,
         body: Vec<LoanInput>,
@@ -243,12 +273,12 @@ impl LoanClient {
             }
         }
 
-        let client = reqwest::Client::new();
+        let client = reqwest::blocking::Client::new();
 
         let mut headers = reqwest::header::HeaderMap::new();
         headers.insert(
-            reqwest::header::AUTHORIZATION,
-            reqwest::header::HeaderValue::from_str(&bearer_token).unwrap(),
+            "Authorization",
+            format!("Bearer {}", &bearer_token).parse().unwrap(),
         );
 
         headers.insert(
@@ -256,16 +286,28 @@ impl LoanClient {
             reqwest::header::HeaderValue::from_static("application/json"),
         );
 
-        let res = client.post(&url).headers(headers).json(&body).send().await;
+        let res = client.post(&url).headers(headers).json(&body).send();
 
         match res {
-            Ok(res) => {
-                let json = res.json::<Vec<CalculateLonaResponse>>().await;
-                match json {
-                    Ok(json) => Ok(json),
-                    Err(e) => Err(Error::new(std::io::ErrorKind::Other, e)),
+            Ok(res) => match res.status() {
+                reqwest::StatusCode::OK => {
+                    let json = res.json::<Vec<CalculateLonaResponse>>();
+                    match json {
+                        Ok(json) => Ok(json),
+                        Err(e) => Err(Error::new(std::io::ErrorKind::Other, e)),
+                    }
                 }
-            }
+                _ => {
+                    let json = res.json::<serde_json::Value>();
+                    match json {
+                        Ok(json) => Err(Error::new(
+                            std::io::ErrorKind::Other,
+                            serde_json::to_string(&json).unwrap(),
+                        )),
+                        Err(e) => Err(Error::new(std::io::ErrorKind::Other, e)),
+                    }
+                }
+            },
             Err(e) => Err(Error::new(std::io::ErrorKind::Other, e)),
         }
     }
@@ -299,8 +341,8 @@ impl LoanClient {
 
         let mut headers = reqwest::header::HeaderMap::new();
         headers.insert(
-            reqwest::header::AUTHORIZATION,
-            reqwest::header::HeaderValue::from_str(&bearer_token).unwrap(),
+            "Authorization",
+            format!("Bearer {}", &bearer_token).parse().unwrap(),
         );
 
         headers.insert(
@@ -311,13 +353,25 @@ impl LoanClient {
         let res = client.post(&url).headers(headers).json(&body).send().await;
 
         match res {
-            Ok(res) => {
-                let json = res.json::<LoanCreted>().await;
-                match json {
-                    Ok(json) => Ok(json),
-                    Err(e) => Err(Error::new(std::io::ErrorKind::Other, e)),
+            Ok(res) => match res.status() {
+                reqwest::StatusCode::OK => {
+                    let json = res.json::<LoanCreted>().await;
+                    match json {
+                        Ok(json) => Ok(json),
+                        Err(e) => Err(Error::new(std::io::ErrorKind::Other, e)),
+                    }
                 }
-            }
+                _ => {
+                    let json = res.json::<serde_json::Value>().await;
+                    match json {
+                        Ok(json) => Err(Error::new(
+                            std::io::ErrorKind::Other,
+                            serde_json::to_string(&json).unwrap(),
+                        )),
+                        Err(e) => Err(Error::new(std::io::ErrorKind::Other, e)),
+                    }
+                }
+            },
             Err(e) => Err(Error::new(std::io::ErrorKind::Other, e)),
         }
     }
@@ -344,5 +398,28 @@ mod tests {
             json,
             r#"{"base_url":"base_url","public_key":"public_key","name":"bank_name","logo_url":"logo_url","redirect_url":"redirect_url"}"#
         );
+    }
+
+    // test auth process
+    #[test]
+    fn test_auth() {
+        let client = LoanClient::new(
+            String::from("http://localhost:8080"),
+            String::from("QX5MgtTRCY48Nk7oMsXlDawofy2qmP8ngyjf8RMfVS62oaHFAq"),
+            String::from("eplvesJPuZSS9oOkNQM1pLmZBvazv"),
+            String::from("access"),
+            String::from("logo_url"),
+            String::from("http://127.0.0.1:8020/"),
+        );
+
+        let user = client.exchange_code_auth("w59HPRYvCiE49eeGjazFIw==");
+        match user {
+            Ok(user) => {
+                println!("user {:?}", user);
+            }
+            Err(e) => {
+                println!("error {:?}", e.to_string());
+            }
+        }
     }
 }
