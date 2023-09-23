@@ -30,7 +30,7 @@ use super::types::{
 /// }
 /// ```
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct LoanClient {
     pub base_url: String,
     #[serde(skip_serializing)]
