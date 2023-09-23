@@ -9,7 +9,7 @@ pub struct AnchorPagination {
 
 // impl default for AnchorPagination
 impl AnchorPagination {
-    pub fn default(&self) -> Self {
+    pub fn default() -> Self {
         AnchorPagination {
             page: Some(1),
             page_size: Some(20),
