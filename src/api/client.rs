@@ -8,6 +8,7 @@ use super::types::{
     OuathToken, OuathUser, PaginatedAnchors,
 };
 
+
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct LoanClient {
     pub base_url: String,
