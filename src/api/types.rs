@@ -9,16 +9,16 @@ pub struct AnchorPagination {
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Anchor {
-    anchor_id: i32,
-    business_logo: Option<String>,
-    business_type: Option<String>,
-    company_email: Option<String>,
-    company_name: Option<String>,
-    created_at: String,
-    loaned_amount: f64,
-    max_loan_amount: f64,
-    tener_id: i32,
-    updated_at: String,
+    pub anchor_id: i32,
+    pub business_logo: Option<String>,
+    pub business_type: Option<String>,
+    pub company_email: Option<String>,
+    pub company_name: Option<String>,
+    pub created_at: String,
+    pub loaned_amount: f64,
+    pub max_loan_amount: f64,
+    pub tener_id: i32,
+    pub updated_at: String,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
