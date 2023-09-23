@@ -10,7 +10,7 @@ We dont have a public test API yet. You can contact us at [Supremo Loan](https:/
 
 ```toml
 [dependencies]
-supremo-loan = "0.1.0"
+supremo_loan = "0.1.0"
 ```
 
 ## Usage
