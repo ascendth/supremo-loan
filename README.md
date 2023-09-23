@@ -6,13 +6,6 @@ this is official implementation of the Supremo Loan API. It is a wrapper for the
 
 We dont have a public test API yet. You can contact us at [Supremo Loan](https://supremoloans.com) to get access to the API.
 
-## Installation
-
-```toml
-[dependencies]
-supremo_loan = "0.1.0"
-```
-
 ## Usage
 
 ```rust
