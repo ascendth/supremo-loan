@@ -9,6 +9,11 @@ include = [
     "README.md",
     "LICENSE",
 ]
+homepage = "https://github.com/ascendth/supremo-loan"
+description = "Supremo Loan API"
+keywords = ["supremo", "loan", "api"]
+categories = ["api", "supremo", "loan"]
+license = "MIT"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 [dependencies]
