@@ -7,6 +7,17 @@ pub struct AnchorPagination {
     pub order: Option<String>,  // "-id" or "id"
 }
 
+// impl default for AnchorPagination
+impl AnchorPagination {
+    pub fn default(&self) -> Self {
+        AnchorPagination {
+            page: Some(1),
+            page_size: Some(20),
+            order: Some("-id".to_string()),
+        }
+    }
+}
+
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Anchor {
     pub anchor_id: i32,
@@ -59,31 +70,30 @@ pub struct ClientLimit {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct LoanCreted {
-    pub message: String
+    pub message: String,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-pub struct OuathUser{
-    pub id : i32,
-    pub email : String,
-    pub company_name : String,
-    pub anchor_id : i32,
+pub struct OuathUser {
+    pub id: i32,
+    pub email: String,
+    pub company_name: String,
+    pub anchor_id: i32,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-pub struct OuathCode{
-    pub access_token : String,
-    pub refresh_token : String,
-    pub token_type : String,
-    pub expires_in : i32,
-    pub scope : String,
+pub struct OuathCode {
+    pub access_token: String,
+    pub refresh_token: String,
+    pub token_type: String,
+    pub expires_in: i32,
+    pub scope: String,
 }
 
-
 #[derive(Serialize, Deserialize, Debug)]
-pub struct OuathToken{
-    pub access_token : String,
-    pub token_type : String,
-    pub expires_in : i32,
-    pub scope : String,
+pub struct OuathToken {
+    pub access_token: String,
+    pub token_type: String,
+    pub expires_in: i32,
+    pub scope: String,
 }
