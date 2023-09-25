@@ -8,6 +8,156 @@ use super::types::{
     OuathToken, OuathUser, PaginatedAnchors,
 };
 
+/// # Examples
+/// ```
+///     use supremo_loan::api::client::LoanClient;
+///     #[tokio::main]
+///     async fn main() {
+///     let client = LoanClient::new(
+///         String::from("base_url"),
+///         String::from("secret_key"),
+///         String::from("public_key"),
+///         String::from("access"),
+///         String::from("logo_url"),
+///         String::from("redirect_url"),
+///     );
+///     // convert to json
+///     let json = serde_json::to_string(&client).unwrap();
+///     // make sure secret_key are not serialized
+///     assert_eq!(
+///        json,
+///         r#"{"base_url":"base_url","public_key":"public_key","name":"access","logo_url":"logo_url","redirect_url":"redirect_url"}"#
+///     );
+///     }
+/// ```
+
+/// // Examples
+/// ```
+///     use supremo_loan::api::client::LoanClient;
+///     #[tokio::main]
+///     async fn main() {
+///         let client = LoanClient::new(
+///             String::from("base_url"),
+///             String::from("secret_key"),
+///             String::from("public_key"),
+///             String::from("bank_name"),
+///             String::from("logo_url"),
+///             String::from("redirect_url"),
+///         );
+///         // convert to json
+///         let json = serde_json::to_string(&client).unwrap();
+///         // make sure secret_key are not serialized
+///         assert_eq!(
+///             json,
+///             r#"{"base_url":"base_url","public_key":"public_key","name":"bank_name","logo_url":"logo_url","redirect_url":"redirect_url"}"#
+///         );
+///     }
+///```
+
+///    // Examples
+/// ```
+///     use supremo_loan::api::client::LoanClient;
+///    #[tokio::main]
+///     async fn main() {
+///         let client = LoanClient::new(
+///             String::from("http://localhost:8080"),
+///             String::from("QX5MgtTRCY48Nk7oMsXlDawofy2qmP8ngyjf8RMfVS62oaHFAq"),
+///             String::from("eplvesJPuZSS9oOkNQM1pLmZBvazv"),
+///             String::from("access"),
+///             String::from("logo_url"),
+///             String::from("http://127.0.0.1:8020/"),
+///         );
+///
+///         let user = client.exchange_code_auth("w59HPRYvCiE49eeGjazFIw==").await;
+///         match user {
+///             Ok(user) => {
+///                 println!("user {:?}", user);
+///             }
+///             Err(e) => {
+///                 println!("error {:?}", e.to_string());
+///             }
+///         }
+///     }
+/// ```
+
+///  // Examples
+/// ```
+///     use supremo_loan::api::client::LoanClient;
+///     #[tokio::main]
+///     async fn main() {
+///         let client = LoanClient::new(
+///             String::from("http://localhost:8080"),
+///             String::from("QX5MgtTRCY48Nk7oMsXlDawofy2qmP8ngyjf8RMfVS62oaHFAq"),
+///             String::from("eplvesJPuZSS9oOkNQM1pLmZBvazv"),
+///             String::from("access"),
+///             String::from("logo_url"),
+///             String::from("http://127.0.0.1:8020/"),
+///         );
+///
+///         let user = client.get_anchors("uc3zfHDuYEmzhn9FM7lwNQ==", 1, None).await;
+///         match user {
+///             Ok(user) => {
+///                 println!("user {:?}", user);
+///             }
+///             Err(e) => {
+///                 println!("error {:?}", e.to_string());
+///             }
+///         }
+///     }
+/// ```
+
+/// // Examples
+///
+/// ```
+///     use supremo_loan::api::client::LoanClient;
+///     #[tokio::main]
+///     async fn main() {
+///         let client = LoanClient::new(
+///             String::from("http://localhost:8080"),
+///             String::from("QX5MgtTRCY48Nk7oMsXlDawofy2qmP8ngyjf8RMfVS62oaHFAq"),
+///             String::from("eplvesJPuZSS9oOkNQM1pLmZBvazv"),
+///             String::from("access"),
+///             String::from("logo_url"),
+///             String::from("http://127.0.0.1:8020/"),
+///         );
+///
+///         let user = client.client_limit("uc3zfHDuYEmzhn9FM7lwNQ==", 1).await;
+///         match user {
+///             Ok(user) => {
+///                 println!("user {:?}", user);
+///             }
+///             Err(e) => {
+///                 println!("error {:?}", e.to_string());
+///             }
+///         }
+///     }
+/// ```
+/// // Examples
+///
+/// ```
+///     use supremo_loan::api::client::LoanClient;
+///     #[tokio::main]
+///     async fn main() {
+///         let client = LoanClient::new(
+///             String::from("http://localhost:8080"),
+///             String::from("QX5MgtTRCY48Nk7oMsXlDawofy2qmP8ngyjf8RMfVS62oaHFAq"),
+///             String::from("eplvesJPuZSS9oOkNQM1pLmZBvazv"),
+///             String::from("access"),
+///             String::from("logo_url"),
+///             String::from("http://127.0.0.1:8020/"),
+///         );
+///         let ouath = client.get_auth_token().await;
+///         match ouath {
+///             Ok(ouath) => {
+///                 println!("ouath {:?}", ouath);
+///             }
+///             Err(e) => {
+///                 println!("error", e.to_string());
+///             }
+///         }
+///     }
+/// }
+/// ```
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct LoanClient {
@@ -410,6 +560,121 @@ impl LoanClient {
                 }
             },
             Err(e) => Err(Error::new(std::io::ErrorKind::Other, e)),
+        }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[tokio::test]
+    async fn create_client() {
+        let client = LoanClient::new(
+            String::from("base_url"),
+            String::from("secret_key"),
+            String::from("public_key"),
+            String::from("bank_name"),
+            String::from("logo_url"),
+            String::from("redirect_url"),
+        );
+        // convert to json
+        let json = serde_json::to_string(&client).unwrap();
+        // make sure secret_key are not serialized
+        assert_eq!(
+            json,
+            r#"{"base_url":"base_url","public_key":"public_key","name":"bank_name","logo_url":"logo_url","redirect_url":"redirect_url"}"#
+        );
+    }
+
+    // test auth process
+    #[tokio::test]
+    async fn test_user_auth() {
+        let client = LoanClient::new(
+            String::from("http://localhost:8080"),
+            String::from("QX5MgtTRCY48Nk7oMsXlDawofy2qmP8ngyjf8RMfVS62oaHFAq"),
+            String::from("eplvesJPuZSS9oOkNQM1pLmZBvazv"),
+            String::from("access"),
+            String::from("logo_url"),
+            String::from("http://127.0.0.1:8020/"),
+        );
+
+        let user = client.exchange_code_auth("w59HPRYvCiE49eeGjazFIw==").await;
+        match user {
+            Ok(user) => {
+                println!("user {:?}", user);
+            }
+            Err(e) => {
+                println!("error {:?}", e.to_string());
+            }
+        }
+    }
+
+    #[tokio::test]
+    async fn test_get_anchors() {
+        let client = LoanClient::new(
+            String::from("http://localhost:8080"),
+            String::from("QX5MgtTRCY48Nk7oMsXlDawofy2qmP8ngyjf8RMfVS62oaHFAq"),
+            String::from("eplvesJPuZSS9oOkNQM1pLmZBvazv"),
+            String::from("access"),
+            String::from("logo_url"),
+            String::from("http://127.0.0.1:8020/"),
+        );
+
+        let user = client
+            .get_anchors("uc3zfHDuYEmzhn9FM7lwNQ==", 1, None)
+            .await;
+        match user {
+            Ok(user) => {
+                println!("user {:?}", user);
+            }
+            Err(e) => {
+                println!("error {:?}", e.to_string());
+            }
+        }
+    }
+
+    #[tokio::test]
+    async fn test_client_limits() {
+        let client = LoanClient::new(
+            String::from("http://localhost:8080"),
+            String::from("QX5MgtTRCY48Nk7oMsXlDawofy2qmP8ngyjf8RMfVS62oaHFAq"),
+            String::from("eplvesJPuZSS9oOkNQM1pLmZBvazv"),
+            String::from("access"),
+            String::from("logo_url"),
+            String::from("http://127.0.0.1:8020/"),
+        );
+
+        let user = client.client_limit("uc3zfHDuYEmzhn9FM7lwNQ==", 1).await;
+        match user {
+            Ok(user) => {
+                println!("user {:?}", user);
+            }
+            Err(e) => {
+                println!("error {:?}", e.to_string());
+            }
+        }
+    }
+
+    #[tokio::test]
+    async fn test_auth_token() {
+        let client = LoanClient::new(
+            String::from("http://localhost:8080"),
+            String::from("QX5MgtTRCY48Nk7oMsXlDawofy2qmP8ngyjf8RMfVS62oaHFAq"),
+            String::from("eplvesJPuZSS9oOkNQM1pLmZBvazv"),
+            String::from("access"),
+            String::from("logo_url"),
+            String::from("http://127.0.0.1:8020/"),
+        );
+
+        let ouath = client.get_auth_token().await;
+        match ouath {
+            Ok(ouath) => {
+                println!("ouath {:?}", ouath);
+            }
+            Err(e) => {
+                println!("error {:?}", e.to_string());
+            }
         }
     }
 }
